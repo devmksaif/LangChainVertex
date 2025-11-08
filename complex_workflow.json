@@ -1,0 +1,740 @@
+{
+  "workflow": {
+    "nodes": [
+      {
+        "id": "webhook_trigger-1",
+        "type": "webhook_trigger",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "data": {
+          "label": "Order Webhook",
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "output_exec",
+              "label": "Run",
+              "type": "execution"
+            },
+            {
+              "id": "output_data",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "webhook_url": "Generated on creation",
+            "response_body": "{ \"status\": \"received\", \"order_id\": \"{{input.data.order_id}}\" }"
+          }
+        }
+      },
+      {
+        "id": "javascript-1",
+        "type": "javascript",
+        "position": {
+          "x": 350,
+          "y": 100
+        },
+        "data": {
+          "label": "Validate Order Data",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "exec_out",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "script": "const order = context['webhook_trigger-1'].Data;\nconst requiredFields = ['customer_email', 'product_id', 'quantity', 'total'];\nconst isValid = requiredFields.every(field => order && order[field] !== undefined && order[field] !== null);\nreturn { ...order, isValid: isValid };"
+          }
+        }
+      },
+      {
+        "id": "if_else-1",
+        "type": "if_else",
+        "position": {
+          "x": 600,
+          "y": 100
+        },
+        "data": {
+          "label": "Is Order Valid?",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "true",
+              "label": "True",
+              "type": "execution"
+            },
+            {
+              "id": "false",
+              "label": "False",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "field": "isValid",
+            "operator": "==",
+            "value": true
+          }
+        }
+      },
+      {
+        "id": "delay-1",
+        "type": "delay",
+        "position": {
+          "x": 850,
+          "y": 0
+        },
+        "data": {
+          "label": "Delay 10s",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output",
+              "label": "Output",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "duration": "10s"
+          }
+        }
+      },
+      {
+        "id": "data_mapping-1",
+        "type": "data_mapping",
+        "position": {
+          "x": 1100,
+          "y": 0
+        },
+        "data": {
+          "label": "Extract Order Details",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "exec_out",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "mapping": "{\n  \"customer_email\": \"{{input.data.customer_email}}\",\n  \"customer_name\": \"{{input.data.customer_name}}\",\n  \"order_id\": \"{{input.data.order_id}}\",\n  \"product_id\": \"{{input.data.product_id}}\",\n  \"product_name\": \"{{input.data.product_name}}\",\n  \"quantity\": \"{{input.data.quantity}}\",\n  \"total\": \"{{input.data.total}}\"\n}"
+          }
+        }
+      },
+      {
+        "id": "parallel-1",
+        "type": "parallel",
+        "position": {
+          "x": 1350,
+          "y": -100
+        },
+        "data": {
+          "label": "Parallel Processing",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "path1",
+              "label": "Path 1",
+              "type": "execution"
+            },
+            {
+              "id": "path2",
+              "label": "Path 2",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {}
+        }
+      },
+      {
+        "id": "gpt_prompt-1",
+        "type": "gpt_prompt",
+        "position": {
+          "x": 1600,
+          "y": -200
+        },
+        "data": {
+          "label": "Generate Email Message",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "exec_out",
+              "label": "Continue",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "credential_name": "My OpenAI Key",
+            "model": "gpt-3.5-turbo",
+            "prompt": "Generate a concise, friendly order confirmation message for customer {{context['data_mapping-1'].Data.customer_name}} for order {{context['data_mapping-1'].Data.order_id}}. Mention product {{context['data_mapping-1'].Data.product_name}} and total amount ${{context['data_mapping-1'].Data.total}}. Focus on confirming the order and thanking the customer. Return only the message text."
+          }
+        }
+      },
+      {
+        "id": "email-1",
+        "type": "email",
+        "position": {
+          "x": 1850,
+          "y": -200
+        },
+        "data": {
+          "label": "Send Confirmation Email",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output",
+              "label": "Output",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "credential_name": "My Resend Key",
+            "from": "orders@yourstore.com",
+            "to": "{{context['data_mapping-1'].Data.customer_email}}",
+            "subject": "Your Order #{{context['data_mapping-1'].Data.order_id}} Confirmation",
+            "body": "{{context['gpt_prompt-1'].Data.message}}"
+          }
+        }
+      },
+      {
+        "id": "sql-1",
+        "type": "sql",
+        "position": {
+          "x": 1600,
+          "y": 0
+        },
+        "data": {
+          "label": "Update Inventory",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output_exec",
+              "label": "Success",
+              "type": "execution"
+            },
+            {
+              "id": "output_data",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "connection_ref": "my-db-connection",
+            "query": "UPDATE products SET quantity = quantity - {{context['data_mapping-1'].Data.quantity}} WHERE id = '{{context['data_mapping-1'].Data.product_id}}'"
+          }
+        }
+      },
+      {
+        "id": "csv_processing-1",
+        "type": "csv_processing",
+        "position": {
+          "x": 1350,
+          "y": 150
+        },
+        "data": {
+          "label": "Convert to CSV",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "exec_out",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "action": "json_to_csv",
+            "delimiter": ","
+          }
+        }
+      },
+      {
+        "id": "s3-1",
+        "type": "s3",
+        "position": {
+          "x": 1600,
+          "y": 150
+        },
+        "data": {
+          "label": "Upload Order to S3",
+          "inputs": [
+            {
+              "id": "input_exec",
+              "label": "Execute",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output_exec",
+              "label": "Success",
+              "type": "execution"
+            },
+            {
+              "id": "output_data",
+              "label": "Data",
+              "type": "data"
+            },
+            {
+              "id": "output_error",
+              "label": "Error",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "action": "upload",
+            "bucket": "my-order-data",
+            "key": "orders/{{context['data_mapping-1'].Data.order_id}}.csv",
+            "content": "{{context['csv_processing-1'].Data}}"
+          }
+        }
+      },
+      {
+        "id": "if_else-2",
+        "type": "if_else",
+        "position": {
+          "x": 1350,
+          "y": 300
+        },
+        "data": {
+          "label": "Total > $100?",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "true",
+              "label": "True",
+              "type": "execution"
+            },
+            {
+              "id": "false",
+              "label": "False",
+              "type": "execution"
+            },
+            {
+              "id": "data_out",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "parameters": {
+            "field": "total",
+            "operator": ">",
+            "value": "100"
+          }
+        }
+      },
+      {
+        "id": "slack-1",
+        "type": "slack",
+        "position": {
+          "x": 1600,
+          "y": 300
+        },
+        "data": {
+          "label": "Notify Sales Team",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output",
+              "label": "Output",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "webhook_url": "https://hooks.slack.com/services/...",
+            "channel": "#sales-notifications",
+            "text": "New high-value order (ID: {{context['data_mapping-1'].Data.order_id}}) received for ${{context['data_mapping-1'].Data.total}} from {{context['data_mapping-1'].Data.customer_name}}!"
+          }
+        }
+      },
+      {
+        "id": "try_catch-1",
+        "type": "try_catch",
+        "position": {
+          "x": 850,
+          "y": 250
+        },
+        "data": {
+          "label": "Handle Invalid Order",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "try",
+              "label": "Try",
+              "type": "execution"
+            },
+            {
+              "id": "catch",
+              "label": "Catch",
+              "type": "execution"
+            }
+          ],
+          "parameters": {}
+        }
+      },
+      {
+        "id": "log-1",
+        "type": "log",
+        "position": {
+          "x": 1100,
+          "y": 250
+        },
+        "data": {
+          "label": "Log Validation Error",
+          "inputs": [
+            {
+              "id": "exec_in",
+              "label": "Execute",
+              "type": "execution"
+            },
+            {
+              "id": "data_in",
+              "label": "Data",
+              "type": "data"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "exec_out",
+              "label": "Continue",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "message": "Invalid order received. Details: {{context['if_else-1'].Data}}"
+          }
+        }
+      },
+      {
+        "id": "email-2",
+        "type": "email",
+        "position": {
+          "x": 1350,
+          "y": 250
+        },
+        "data": {
+          "label": "Send Rejection Email",
+          "inputs": [
+            {
+              "id": "input",
+              "label": "Input",
+              "type": "execution"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "output",
+              "label": "Output",
+              "type": "execution"
+            }
+          ],
+          "parameters": {
+            "credential_name": "My Resend Key",
+            "from": "support@yourstore.com",
+            "to": "{{context['if_else-1'].Data.customer_email}}",
+            "subject": "Your Order Could Not Be Processed",
+            "body": "Dear {{context['if_else-1'].Data.customer_name || 'Customer'}},\n\nWe regret to inform you that your recent order (ID: {{context['if_else-1'].Data.order_id || 'N/A'}}) could not be processed due to missing or invalid information. Please review your order details and try again.\n\nIf you believe this is an error, please contact support.\n\nSincerely,\nYour E-commerce Team"
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-webhook_trigger-1-javascript-1-exec",
+        "source": "webhook_trigger-1",
+        "target": "javascript-1",
+        "sourceHandle": "output_exec",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-webhook_trigger-1-javascript-1-data",
+        "source": "webhook_trigger-1",
+        "target": "javascript-1",
+        "sourceHandle": "output_data",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-javascript-1-if_else-1-exec",
+        "source": "javascript-1",
+        "target": "if_else-1",
+        "sourceHandle": "exec_out",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-javascript-1-if_else-1-data",
+        "source": "javascript-1",
+        "target": "if_else-1",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-if_else-1-delay-1-true",
+        "source": "if_else-1",
+        "target": "delay-1",
+        "sourceHandle": "true",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-if_else-1-data_mapping-1-data",
+        "source": "if_else-1",
+        "target": "data_mapping-1",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-delay-1-data_mapping-1-exec",
+        "source": "delay-1",
+        "target": "data_mapping-1",
+        "sourceHandle": "output",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-data_mapping-1-parallel-1-exec",
+        "source": "data_mapping-1",
+        "target": "parallel-1",
+        "sourceHandle": "exec_out",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-data_mapping-1-parallel-1-data",
+        "source": "data_mapping-1",
+        "target": "parallel-1",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-parallel-1-gpt_prompt-1-path1",
+        "source": "parallel-1",
+        "target": "gpt_prompt-1",
+        "sourceHandle": "path1",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-gpt_prompt-1-email-1-exec",
+        "source": "gpt_prompt-1",
+        "target": "email-1",
+        "sourceHandle": "exec_out",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-parallel-1-sql-1-path2",
+        "source": "parallel-1",
+        "target": "sql-1",
+        "sourceHandle": "path2",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-data_mapping-1-csv_processing-1-exec",
+        "source": "data_mapping-1",
+        "target": "csv_processing-1",
+        "sourceHandle": "exec_out",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-data_mapping-1-csv_processing-1-data",
+        "source": "data_mapping-1",
+        "target": "csv_processing-1",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-csv_processing-1-s3-1-exec",
+        "source": "csv_processing-1",
+        "target": "s3-1",
+        "sourceHandle": "exec_out",
+        "targetHandle": "input_exec"
+      },
+      {
+        "id": "e-data_mapping-1-if_else-2-exec",
+        "source": "data_mapping-1",
+        "target": "if_else-2",
+        "sourceHandle": "exec_out",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-data_mapping-1-if_else-2-data",
+        "source": "data_mapping-1",
+        "target": "if_else-2",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-if_else-2-slack-1-true",
+        "source": "if_else-2",
+        "target": "slack-1",
+        "sourceHandle": "true",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-if_else-1-try_catch-1-false",
+        "source": "if_else-1",
+        "target": "try_catch-1",
+        "sourceHandle": "false",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-try_catch-1-log-1-try",
+        "source": "try_catch-1",
+        "target": "log-1",
+        "sourceHandle": "try",
+        "targetHandle": "exec_in"
+      },
+      {
+        "id": "e-if_else-1-log-1-data",
+        "source": "if_else-1",
+        "target": "log-1",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      },
+      {
+        "id": "e-log-1-email-2-exec",
+        "source": "log-1",
+        "target": "email-2",
+        "sourceHandle": "exec_out",
+        "targetHandle": "input"
+      },
+      {
+        "id": "e-if_else-1-email-2-data",
+        "source": "if_else-1",
+        "target": "email-2",
+        "sourceHandle": "data_out",
+        "targetHandle": "data_in"
+      }
+    ]
+  },
+  "apikey": "dummy"
+}
