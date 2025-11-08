@@ -5,8 +5,35 @@ services:
     image: langchain-app:latest
     env_file:
       - .env
+    environment:
+      # Node environment
+      - NODE_ENV=production
+      
+      # Supabase Configuration
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      
+      # JuliaBot Configuration
+      - PUBLIC_JULIA_BOT_API=https://core.juliabot.com
+      - JULIABOT_API_URL=https://core.juliabot.com/api/v1/bot/JuliabotChat/
+      
+      # API Keys (optional - can be stored in Supabase credentials table)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      
+      # AWS Configuration (optional)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      
+      # Application Configuration
+      - BASE_URL=${BASE_URL:-http://localhost:5000}
+      - PORT=${PORT:-5000}
+      
     ports:
-      - "5000:5000"
+      - "${PORT:-5000}:5000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/hello"]
